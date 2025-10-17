@@ -1,4 +1,5 @@
 local uv = vim.loop or vim.uv
+local config = require('gemini.config')
 
 local M = {}
 
@@ -13,8 +14,9 @@ M.MODELS = {
 }
 
 M.gemini_generate_content = function(user_text, system_text, model_name, generation_config, callback)
-  local api_key = os.getenv("GEMINI_API_KEY")
+  local api_key = config.get_api_key()
   if not api_key then
+    vim.notify('Gemini API key not configured. Set it in your setup() or via GEMINI_API_KEY env variable', vim.log.levels.ERROR)
     return ''
   end
 
@@ -55,8 +57,9 @@ M.gemini_generate_content = function(user_text, system_text, model_name, generat
 end
 
 M.gemini_generate_content_stream = function(user_text, model_name, generation_config, callback)
-  local api_key = os.getenv("GEMINI_API_KEY")
+  local api_key = config.get_api_key()
   if not api_key then
+    vim.notify('Gemini API key not configured. Set it in your setup() or via GEMINI_API_KEY env variable', vim.log.levels.ERROR)
     return
   end
 

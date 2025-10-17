@@ -43,33 +43,95 @@ https://github.com/user-attachments/assets/d3918d2a-4cf7-4639-bc21-689d4225ba6d
 
 - install `curl`
 
-```
+```bash
 sudo apt install curl
 ```
 
+### API Key Configuration
 
+You have multiple secure options to configure your Gemini API key:
 
+#### Option 1: Direct Configuration (Simple)
+```lua
+require('gemini').setup({
+  api_key_config = {
+    api_key = "your-api-key-here"
+  }
+})
+```
 
+#### Option 2: Read from a Secure File (Recommended)
+```lua
+require('gemini').setup({
+  api_key_config = {
+    api_key = function()
+      local key_file = vim.fn.expand("~/.config/gemini-api-key")
+      local lines = vim.fn.readfile(key_file)
+      return lines[1]
+    end
+  }
+})
+```
 
-```shell
+Then store your API key in the file:
+```bash
+echo "your-api-key-here" > ~/.config/gemini-api-key
+chmod 600 ~/.config/gemini-api-key  # Secure the file
+```
+
+#### Option 3: Use a Password Manager (Most Secure)
+```lua
+require('gemini').setup({
+  api_key_config = {
+    api_key = function()
+      -- Example with pass (the standard unix password manager)
+      return vim.fn.system("pass show gemini-api-key"):gsub("\n", "")
+    end
+  }
+})
+```
+
+#### Option 4: Environment Variable (Fallback)
+If you don't configure `api_key`, the plugin will fall back to the `GEMINI_API_KEY` environment variable:
+```bash
 export GEMINI_API_KEY="<your API key here>"
 ```
+
+### Plugin Managers
 
 * [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 {
   'kiddos/gemini.nvim',
-  opts = {}
+  opts = {
+    api_key_config = {
+      api_key = function()
+        -- Your secure API key retrieval method
+        return vim.fn.readfile(vim.fn.expand("~/.config/gemini-api-key"))[1]
+      end
+    }
+  }
 }
 ```
 
 
 * [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
-
 ```lua
-use { 'kiddos/gemini.nvim', opts = {} }
+use { 
+  'kiddos/gemini.nvim',
+  config = function()
+    require('gemini').setup({
+      api_key_config = {
+        api_key = function()
+          -- Your secure API key retrieval method
+          return vim.fn.readfile(vim.fn.expand("~/.config/gemini-api-key"))[1]
+        end
+      }
+    })
+  end
+}
 ```
 
 ## Settings
@@ -78,6 +140,11 @@ default setting
 
 ```lua
 {
+  api_key_config = {
+    -- API key configuration (see API Key Configuration section above)
+    -- Can be a string, function, or nil (falls back to env var)
+    api_key = nil,
+  },
   model_config = {
     model_id = 'gemini-2.5-flash',
     temperature = 0.10,

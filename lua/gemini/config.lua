@@ -3,6 +3,14 @@ local util = require('gemini.util')
 
 local M = {}
 
+local default_api_key_config = {
+  -- API key can be:
+  -- 1. A string: "your-api-key-here"
+  -- 2. A function that returns a string: function() return vim.fn.system("pass show gemini-api-key"):gsub("\n", "") end
+  -- 3. nil (will fall back to GEMINI_API_KEY environment variable)
+  api_key = nil,
+}
+
 local default_model_config = {
   model_id = api.MODELS.GEMINI_2_5_FLASH_LITE,
   temperature = 0.10,
@@ -157,6 +165,7 @@ M.set_config = function(opts)
   opts = opts or {}
 
   M.config = {
+    api_key_config = vim.tbl_deep_extend('force', {}, default_api_key_config, opts.api_key_config or {}),
     model = vim.tbl_deep_extend('force', {}, default_model_config, opts.model_config or {}),
     chat = vim.tbl_deep_extend('force', {}, default_chat_config, opts.chat_config or {}),
     hints = vim.tbl_deep_extend('force', {}, default_hints_config, opts.hints or {}),
@@ -176,6 +185,30 @@ M.get_gemini_generation_config = function()
     topK = M.get_config({ 'model', 'top_k' }) or default_model_config.top_k,
     response_mime_type = M.get_config({ 'model', 'response_mime_type' }) or 'text/plain',
   }
+end
+
+M.get_api_key = function()
+  local api_key = M.get_config({ 'api_key_config', 'api_key' })
+  
+  -- If api_key is a function, call it to get the key
+  if type(api_key) == 'function' then
+    local ok, result = pcall(api_key)
+    if ok and result then
+      -- Trim any whitespace/newlines
+      return result:gsub("^%s*(.-)%s*$", "%1")
+    else
+      vim.notify('Failed to retrieve API key from function', vim.log.levels.ERROR)
+      return nil
+    end
+  end
+  
+  -- If api_key is a string, return it
+  if type(api_key) == 'string' and api_key ~= '' then
+    return api_key
+  end
+  
+  -- Fall back to environment variable
+  return os.getenv("GEMINI_API_KEY")
 end
 
 return M
