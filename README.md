@@ -103,7 +103,7 @@ export GEMINI_API_KEY="<your API key here>"
 
 ```lua
 {
-  'kiddos/gemini.nvim',
+  'andrew-solarstorm/gemini.nvim',
   opts = {
     api_key_config = {
       api_key = function()
@@ -120,7 +120,7 @@ export GEMINI_API_KEY="<your API key here>"
 
 ```lua
 use { 
-  'kiddos/gemini.nvim',
+  'andrew-solarstorm/gemini.nvim',
   config = function()
     require('gemini').setup({
       api_key_config = {

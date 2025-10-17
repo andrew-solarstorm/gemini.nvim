@@ -11,7 +11,7 @@ local default_api_key_config = {
 }
 
 local default_model_config = {
-  model_id = 'gemini-2.5-flash-lite',
+  model_id = 'gemini-2.5-flash',
   temperature = 0.10,
   top_k = 128,
   response_mime_type = 'text/plain',
